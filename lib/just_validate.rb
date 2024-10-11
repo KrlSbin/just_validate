@@ -1,10 +1,14 @@
+# frozen_string_literal: true
+
+# JustValidate module
 module JustValidate
   def self.included(base)
     base.extend(ClassMethods)
   end
 
+  # JustValidate::ClassMethods module
   module ClassMethods
-    ['reader', 'writer', 'accessor'].each do |method|
+    %w[reader writer accessor].each do |method|
       define_method("attr_#{method}") do |*attrs|
         @attributes ||= []
         @attributes += attrs
@@ -31,11 +35,12 @@ module JustValidate
     # validate :owner, type: User
     def validate(attr_k, condition)
       raise "Wrong attribute '#{attr_k}'" unless attributes.include? attr_k
+
       validator_k = condition.keys.first
       validator_c = condition.values.first
       begin
         validator_class = Object.const_get "JustValidate::#{validator_k.to_s.capitalize}Validator"
-      rescue
+      rescue StandardError
         raise NotImplementedError, "#{validator_k} is not implemented"
       end
 
@@ -48,6 +53,7 @@ module JustValidate
     end
   end
 
+  # JustValidate::BaseValidator class
   class BaseValidator
     attr_reader :attr_k, :condition, :attr_v
 
@@ -65,6 +71,7 @@ module JustValidate
     end
   end
 
+  # JustValidate::PresenceValidator class
   class PresenceValidator < BaseValidator
     def validate!(obj)
       super
@@ -73,12 +80,13 @@ module JustValidate
 
     def valid?(obj)
       super
-      if attr_v.nil? || attr_v.empty?
-        ":#{attr_k} is empty or nil"
-      end
+      return unless attr_v.nil? || attr_v.empty?
+
+      ":#{attr_k} is empty or nil"
     end
   end
 
+  # JustValidate::FormatValidator class
   class FormatValidator < BaseValidator
     def validate!(obj)
       super
@@ -87,12 +95,13 @@ module JustValidate
 
     def valid?(obj)
       super
-      unless attr_v.match?(condition)
-        ":#{attr_k} does not match to #{condition}"
-      end
+      return if attr_v.match?(condition)
+
+      ":#{attr_k} does not match to #{condition}"
     end
   end
 
+  # JustValidate::TypeValidator class
   class TypeValidator < BaseValidator
     def validate!(obj)
       super
@@ -101,9 +110,9 @@ module JustValidate
 
     def valid?(obj)
       super
-      unless attr_v.is_a?(condition)
-        ":#{attr_k} is not a kind of #{condition}"
-      end
+      return if attr_v.is_a?(condition)
+
+      ":#{attr_k} is not a kind of #{condition}"
     end
   end
 
