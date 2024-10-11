@@ -2,27 +2,31 @@
 
 require 'spec_helper'
 
+# rubocop:disable Metrics/BlockLength
 RSpec.describe JustValidate do
-  class Chief
-  end
+  before do
+    chief_class = Class.new
+    stub_const('Chief', chief_class)
 
-  class Manager
-  end
+    manager_class = Class.new
+    stub_const('Manager', manager_class)
 
-  class Employee
-    include JustValidate
+    employee_class = Class.new do
+      include JustValidate
 
-    attr_reader :name, :nick, :supervisor
+      attr_reader :name, :nick, :supervisor
 
-    def initialize(name:, nick:, supervisor:)
-      @name = name
-      @nick = nick
-      @supervisor = supervisor
+      def initialize(name:, nick:, supervisor:)
+        @name = name
+        @nick = nick
+        @supervisor = supervisor
+      end
+
+      validate :name, presence: true
+      validate :nick, format: /\A[a-z]{0,5}\z/
+      validate :supervisor, type: Manager
     end
-
-    validate :name, presence: true
-    validate :nick, format: /\A[a-z]{0,5}\z/
-    validate :supervisor, type: Manager
+    stub_const('Employee', employee_class)
   end
 
   describe '#validate!' do
@@ -161,3 +165,4 @@ RSpec.describe JustValidate do
     end
   end
 end
+# rubocop:enable Metrics/BlockLength
