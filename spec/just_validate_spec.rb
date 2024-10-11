@@ -1,9 +1,14 @@
+# frozen_string_literal: true
+
 require 'spec_helper'
 
 RSpec.describe JustValidate do
+  class Chief
+  end
 
-  class Chief; end
-  class Manager; end
+  class Manager
+  end
+
   class Employee
     include JustValidate
 
@@ -113,7 +118,7 @@ RSpec.describe JustValidate do
 
       it 'object should contain errors' do
         subject
-        expect(employee.errors).to eq [":nick does not match to (?-mix:\\A[a-z]{0,5}\\z)"]
+        expect(employee.errors).to eq [':nick does not match to (?-mix:\\A[a-z]{0,5}\\z)']
       end
     end
 
@@ -124,7 +129,7 @@ RSpec.describe JustValidate do
 
       it 'object should contain errors' do
         subject
-        expect(employee.errors).to eq [":supervisor is not a kind of Manager"]
+        expect(employee.errors).to eq [':supervisor is not a kind of Manager']
       end
     end
 
@@ -138,22 +143,21 @@ RSpec.describe JustValidate do
       it 'object should contain errors' do
         subject
         expect(employee.errors.sort).to eq [
-                                             ':name is empty or nil',
-                                             ":nick does not match to (?-mix:\\A[a-z]{0,5}\\z)",
-                                             ":supervisor is not a kind of Manager"
-                                           ].sort
+          ':name is empty or nil',
+          ':nick does not match to (?-mix:\\A[a-z]{0,5}\\z)',
+          ':supervisor is not a kind of Manager'
+        ].sort
       end
 
       it 'object should not contain error duplicates after call valid? twice' do
         subject
         subject
         expect(employee.errors.sort).to eq [
-                                             ':name is empty or nil',
-                                             ":nick does not match to (?-mix:\\A[a-z]{0,5}\\z)",
-                                             ":supervisor is not a kind of Manager"
-                                           ].sort
+          ':name is empty or nil',
+          ':nick does not match to (?-mix:\\A[a-z]{0,5}\\z)',
+          ':supervisor is not a kind of Manager'
+        ].sort
       end
     end
   end
 end
-
